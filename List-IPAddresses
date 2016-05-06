@@ -3,20 +3,54 @@ function List-IPAddresses {
 
 /#>
 
-
-
     param
     (
         [parameter(Mandatory=$false,
         ValueFromPipeline=$true,
         ValueFromPipelineByPropertyName=$true
         )]
-        [Net.IPAddress]$NetworkID="192.168.1.0",
-        [Net.IPAddress]$SubnetMask="255.255.255.0",
-        [string]$Prefixlength=24
+        [Net.IPAddress]$NetworkID,
+        [Net.IPAddress]$SubnetMask,
+        [int]$Prefixlength
     )
     
     process {
+        if ($Prefixlength -ge 32)
+        {
+            $m4 = 255
+        } else
+            {
+                $m4 = 256 - ([math]::Pow(2,((32 - $Prefixlength))))
+            }
+    if ($Prefixlength -ge 24)
+        {
+            $m3 = 255
+        } else
+            {
+                $m3 = 256 - ([math]::Pow(2,((24 - $Prefixlength))))
+                $m4 = 0
+            }
+    if ($Prefixlength -ge 16)
+        {
+            $m2 = 255
+        } else
+            {
+                $m2 = 256 - ([math]::Pow(2,((16 - $Prefixlength))))
+                $m3 = 0
+                $m4 = 0
+            }
+    if ($Prefixlength -ge 8)
+        {
+            $m1 = 255
+        } else
+            {
+                $m1 = 256 - ([math]::Pow(2,((8 - $Prefixlength))))
+                $m2 = 0
+                $m3 = 0
+                $m4 = 0
+            }
+            
+    [Net.IPAddress]$SubnetMask="$m1.$m2.$m3.$m4" 
     
     [int]$ipOct1          = $NetworkID.GetAddressBytes()[0]
     [int]$ipOct2          = $NetworkID.GetAddressBytes()[1]
@@ -38,9 +72,11 @@ function List-IPAddresses {
                     $ipOct4..($ipOct4+(255-$nmOct4)) | foreach {
                     $d = $_
                     $ipList += "$a.$b.$c.$d"
+                                                }
+                                                    }
+                                                        }
+                                                                } 
+    $ipList  
+    
             }
-        }
-    }
-}
-    
-    
+}  
