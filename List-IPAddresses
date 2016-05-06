@@ -1,0 +1,46 @@
+function List-IPAddresses {
+<#
+
+/#>
+
+
+
+    param
+    (
+        [parameter(Mandatory=$false,
+        ValueFromPipeline=$true,
+        ValueFromPipelineByPropertyName=$true
+        )]
+        [Net.IPAddress]$NetworkID="192.168.1.0",
+        [Net.IPAddress]$SubnetMask="255.255.255.0",
+        [string]$Prefixlength=24
+    )
+    
+    process {
+    
+    [int]$ipOct1          = $NetworkID.GetAddressBytes()[0]
+    [int]$ipOct2          = $NetworkID.GetAddressBytes()[1]
+    [int]$ipOct3          = $NetworkID.GetAddressBytes()[2]
+    [int]$ipOct4          = $NetworkID.GetAddressBytes()[3]
+    
+    [int]$nmOct1          = $SubnetMask.GetAddressBytes()[0]
+    [int]$nmOct2          = $SubnetMask.GetAddressBytes()[1]
+    [int]$nmOct3          = $SubnetMask.GetAddressBytes()[2]
+    [int]$nmOct4          = $SubnetMask.GetAddressBytes()[3]
+    
+    $ipList = @()
+    $ipOct1..($ipOct1+(255-$nmOct1)) | foreach {
+        $a = $_ 
+        $ipOct2..($ipOct2+(255-$nmOct2)) | foreach {
+            $b = $_
+            $ipOct3..($ipOct3+(255-$nmOct3)) | foreach {
+                $c = $_
+                    $ipOct4..($ipOct4+(255-$nmOct4)) | foreach {
+                    $d = $_
+                    $ipList += "$a.$b.$c.$d"
+            }
+        }
+    }
+}
+    
+    
