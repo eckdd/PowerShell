@@ -11,10 +11,11 @@ function List-IPAddresses {
         )]
         [Net.IPAddress]$NetworkID,
         [Net.IPAddress]$SubnetMask,
-        [int]$Prefixlength
+        [int]$Prefixlength=0
     )
     
     process {
+
         if ($Prefixlength -ge 32)
         {
             $m4 = 255
@@ -50,8 +51,11 @@ function List-IPAddresses {
                 $m4 = 0
             }
             
-    [Net.IPAddress]$SubnetMask="$m1.$m2.$m3.$m4" 
-    
+    [Net.IPAddress]$prefSubnetMask="$m1.$m2.$m3.$m4" 
+    if ($prefSubnetMask.ToString() -eq "0.0.0.0") { 
+        $SubnetMask = $SubnetMask
+            } else { $SubnetMask = $prefSubnetMask }
+
     [int]$ipOct1          = $NetworkID.GetAddressBytes()[0]
     [int]$ipOct2          = $NetworkID.GetAddressBytes()[1]
     [int]$ipOct3          = $NetworkID.GetAddressBytes()[2]
