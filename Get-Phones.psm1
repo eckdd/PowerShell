@@ -24,31 +24,90 @@ Maximum number of concurrent phones to query (Default is 10).
 
     param
     (
-        [parameter(Mandatory=$true,
+        [Parameter(Mandatory=$true,
         ValueFromPipeline=$true,
-        ValueFromPipelineByPropertyName=$true
-        )]
-        [string]$NetworkID,
-        [int]$PrefixLength=24,
-        [string]$OutFile,
-        [int]$MaxConnections=10
+        ValueFromPipelineByPropertyName=$true)]
+            [Net.IPAddress]$NetworkID,
+        [Parameter(Mandatory=$false,
+        ValueFromPipeline=$true,
+        ValueFromPipelineByPropertyName=$true)]
+            [string]$OutFile,
+            [int]$MaxConnections=10,
+            [int]$PrefixLength,
+            [Net.IPAddress]$SubnetMask="255.255.255.0",
+            [switch]$SecureWeb
     )
     
     process {
+        if ($Prefixlength -ge 32)
+        {
+            $m4 = 255
+        } else
+            {
+                $m4 = 256 - ([math]::Pow(2,((32 - $Prefixlength))))
+            }
+    if ($Prefixlength -ge 24)
+        {
+            $m3 = 255
+        } else
+            {
+                $m3 = 256 - ([math]::Pow(2,((24 - $Prefixlength))))
+                $m4 = 0
+            }
+    if ($Prefixlength -ge 16)
+        {
+            $m2 = 255
+        } else
+            {
+                $m2 = 256 - ([math]::Pow(2,((16 - $Prefixlength))))
+                $m3 = 0
+                $m4 = 0
+            }
+    if ($Prefixlength -ge 8)
+        {
+            $m1 = 255
+        } else
+            {
+                $m1 = 256 - ([math]::Pow(2,((8 - $Prefixlength))))
+                $m2 = 0
+                $m3 = 0
+                $m4 = 0
+            }
+            
+    [Net.IPAddress]$prefSubnetMask="$m1.$m2.$m3.$m4" 
+    if ($prefSubnetMask.ToString() -eq "0.0.0.0") { 
+        $SubnetMask = $SubnetMask
+            } else { $SubnetMask = $prefSubnetMask }
+
+    [int]$ipOct1          = $NetworkID.GetAddressBytes()[0]
+    [int]$ipOct2          = $NetworkID.GetAddressBytes()[1]
+    [int]$ipOct3          = $NetworkID.GetAddressBytes()[2]
+    [int]$ipOct4          = $NetworkID.GetAddressBytes()[3]
     
-    $Network            = $NetworkID -split ".", 0, "simplematch"
-    [int]$PrefixLength  = 32 - $Prefixlength
-    [int]$Oct1          = $Network[0]
-    [int]$Oct2          = $Network[1]
-    [int]$Oct3          = $Network[2]
-    [int]$Oct4          = $Network[3]
-    [int]$StartIP       = $Oct4
-    [int]$EndIP         = $StartIP + ([math]::Pow( 2, $PrefixLenght )) - 2
+    [int]$nmOct1          = $SubnetMask.GetAddressBytes()[0]
+    [int]$nmOct2          = $SubnetMask.GetAddressBytes()[1]
+    [int]$nmOct3          = $SubnetMask.GetAddressBytes()[2]
+    [int]$nmOct4          = $SubnetMask.GetAddressBytes()[3]
     
+    $ipList = @()
+    $ipOct1..($ipOct1+(255-$nmOct1)) | foreach {
+        $a = $_ 
+        $ipOct2..($ipOct2+(255-$nmOct2)) | foreach {
+            $b = $_
+            $ipOct3..($ipOct3+(255-$nmOct3)) | foreach {
+                $c = $_
+                    $ipOct4..($ipOct4+(255-$nmOct4)) | foreach {
+                    $d = $_
+                    $ipList += "$a.$b.$c.$d"
+    }
+        }
+            }
+                } 
+        $WebProt = "HTTP"        
+        if ($SecureWeb) { $WebProt = "HTTPS" }
         $ErrorActionPreference = "SilentlyContinue"
         Get-Job | Remove-Job
-        $Range  = $StartIP..$EndIP
-        $Range  = foreach {
+        $ipList  = foreach {
         
             $RunningJobs = (Get-Job -State Running | measure).Count
             while ( $RunningJobs -ge $MaxConnections ) {
@@ -68,13 +127,12 @@ Maximum number of concurrent phones to query (Default is 10).
             $TimeZone   = @()
             $IPAddr     = @()
             
-            [int]$Oct4 = [int]$Oct4 -replace "$Oct4",$_
-            $IPAddr    = "$Oct1.$Oct2.$Oct3.$Oct4"
+            $IPAddr    = $_
             Start-Job -ScriptBlock {
                 $client = New-Object System.Net.WebClient
                 $IPAddr = $args[0]
                 
-                $html   = $client.DownloadString("http://$IPAddr")
+                $html   = $client.DownloadString("$WebProt://$IPAddr")
                 $html   = $html -replace "<[^>*?|<[^>]*>", ","
                 $html   = $html -split ', '
                 $html   = $html -replace ',,,,,', ''
@@ -95,7 +153,7 @@ Maximum number of concurrent phones to query (Default is 10).
                 $Version    = $Version  -replace "Version,",""
                 $TimeZone   = $TimeZone -replace "Time Zone,",""
                 
-                $html   = $client.DownloadString("http://$IPAddr/CGI/Java/Serviceability?adapter=device.statistics.configuration")
+                $html   = $client.DownloadString("$WebProt://$IPAddr/CGI/Java/Serviceability?adapter=device.statistics.configuration")
                 $html   = $html -replace "<[^>*?|<[^>]*>", ","
                 $html   = $html -split ', '
                 $html   = $html -replace ',,,,,', ''
@@ -119,7 +177,7 @@ Maximum number of concurrent phones to query (Default is 10).
                 $Phone | Add-Member -MemberType NoteProperty -Name TimeZone     -Value $TimeZone
                 
                 $Phone
-                } -ArgumentList $IPAddr
+                } -ArgumentList $IPAddr,$WebProt
             Write-Progress -Activity "Running Jobs" -Status $IPAddr
             } | Out-Null
             Get-Job | Wait-Job | Out-Null
