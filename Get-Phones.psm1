@@ -107,7 +107,7 @@ Maximum number of concurrent phones to query (Default is 10).
         if ($SecureWeb) { $WebProt = "HTTPS" }
         $ErrorActionPreference = "SilentlyContinue"
         Get-Job | Remove-Job
-        $ipList  = foreach {
+        $ipList  | foreach {
         
             $RunningJobs = (Get-Job -State Running | measure).Count
             while ( $RunningJobs -ge $MaxConnections ) {
