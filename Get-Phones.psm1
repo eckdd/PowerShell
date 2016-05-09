@@ -3,14 +3,14 @@ function Get-Phones {
  .SYNOPSIS
 Scans a network containing Cisco IP Phones with the built-in web interface enabled and outputs information about the endpoint accessible from the phone's web page.
  .DESCRIPTION
-This cmdlet will query the web interface on Cisco IP Phones and outputs to ether the console or a CSV the following information: IP address, whether DHCP is enabled, MAC Address, Hostname, Domain Name, Phone Number, Serial Number, mOdel, Sofware Version, and Timezone
+This cmdlet will query the web interface on Cisco IP Phones and outputs to ether the console or a CSV the following information: IP address, whether DHCP is enabled, MAC Address, Hostname, Domain Name, Phone Number, Serial Number, model, Software Version, and Time zone
 
-This cmdlet can operate on several phoens at once.
+This cmdlet can operate on several phones at once.
  .EXAMPLE
 # Scans the 192.168.1.64/26 network 30 devices at a time and outputs the information to the file Phones.csv 
 Get-Phones -NetworkID 192.168.1.64 -PrefixLength 26 -OutFile Phones.csv -MaxConnections 30
 
-# Scans the 192.168.1.0/24 network 10 phones at a time and outputs the information to varialbe $Phones
+# Scans the 192.168.1.0/24 network 10 phones at a time and outputs the information to variable $Phones
 $Phones = Get-Phones -NetworkID 192.168.1.0 -SecureWeb
 
 # Scans the 192.168.0.128/25 network using HTTPS and outputs to the console.
@@ -21,14 +21,15 @@ Network ID of the subnet to be scanned
  .PARAMETER PrefixLength
 Subnet mask in prefix notation for the network to be scanned. 
  .PARAMETER SubnetMask
-Subnet mask in dotted-decimal format for the network to be scanned. If both the SubnetMask and PrefixLength parameter are ommitted, the Subnet Mask is 255.255.255.0 (/24).
+Subnet mask in dotted-decimal format for the network to be scanned. If both the SubnetMask and PrefixLength parameter are omitted, the Subnet Mask is 255.255.255.0 (/24).
  .PARAMETER SecureWeb
 Specifies that the scan to use HTTPS when connecting to phone endpoints.
  .PARAMETER OutFile
-Path/File name of the output csv, if desired. If ommitted, output is directed to the console.
+Path/File name of the output csv, if desired. If omitted, output is directed to the console.
  .PARAMETER MaxConnections
 Maximum number of concurrent phones to query at a time (Default is 10).
 /#>
+
 
 
     param
@@ -140,8 +141,8 @@ Maximum number of concurrent phones to query at a time (Default is 10).
             Start-Job -ScriptBlock {
                 $client = New-Object System.Net.WebClient
                 $IPAddr = $args[0]
-                
-                $html   = $client.DownloadString("$WebProt://$IPAddr")
+                $WebProt= $args[1]
+                $html   = $client.DownloadString("$WebProt`://$IPAddr")
                 $html   = $html -replace "<[^>*?|<[^>]*>", ","
                 $html   = $html -split ', '
                 $html   = $html -replace ',,,,,', ''
@@ -162,7 +163,7 @@ Maximum number of concurrent phones to query at a time (Default is 10).
                 $Version    = $Version  -replace "Version,",""
                 $TimeZone   = $TimeZone -replace "Time Zone,",""
                 
-                $html   = $client.DownloadString("$WebProt://$IPAddr/CGI/Java/Serviceability?adapter=device.statistics.configuration")
+                $html   = $client.DownloadString("$WebProt`://$IPAddr/CGI/Java/Serviceability?adapter=device.statistics.configuration")
                 $html   = $html -replace "<[^>*?|<[^>]*>", ","
                 $html   = $html -split ', '
                 $html   = $html -replace ',,,,,', ''
