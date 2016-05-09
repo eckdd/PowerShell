@@ -1,24 +1,33 @@
 function Get-Phones {
 <#
  .SYNOPSIS
-Creates CSV containing information from multiple Cisco IP phone web interfaces.
+Scans a network containing Cisco IP Phones with the built-in web interface enabled and outputs information about the endpoint accessible from the phone's web page.
  .DESCRIPTION
-This cmdlet will query the web interface on Cisco IP Phones and create a CSV that contains teh IP address, whether DHCP is enabled, MAC Address, Hostname, Domain Name, Phone Number, Serial Number, mOdel, Sofware Version, and Timezone
+This cmdlet will query the web interface on Cisco IP Phones and outputs to ether the console or a CSV the following information: IP address, whether DHCP is enabled, MAC Address, Hostname, Domain Name, Phone Number, Serial Number, mOdel, Sofware Version, and Timezone
 
 This cmdlet can operate on several phoens at once.
  .EXAMPLE
-# Scans the 192.168.64/26 network 30 devices at a time and outputs the information to the file Phones.csv 
+# Scans the 192.168.1.64/26 network 30 devices at a time and outputs the information to the file Phones.csv 
 Get-Phones -NetworkID 192.168.1.64 -PrefixLength 26 -OutFile Phones.csv -MaxConnections 30
 
 # Scans the 192.168.1.0/24 network 10 phones at a time and outputs the information to varialbe $Phones
+$Phones = Get-Phones -NetworkID 192.168.1.0 -SecureWeb
+
+# Scans the 192.168.0.128/25 network using HTTPS and outputs to the console.
+Get-Phones -NetworkID 192.168.0.128 -SubnetMask 255.255.255.128 -SecureWeb
+
  .PARAMETER NetworkID
 Network ID of the subnet to be scanned
- .PARAMETER PrefixLenght
-Subnet mask in prefix notation for the network to be scanned (Default is /24). Must be between 24-32.
+ .PARAMETER PrefixLength
+Subnet mask in prefix notation for the network to be scanned. 
+ .PARAMETER SubnetMask
+Subnet mask in dotted-decimal format for the network to be scanned. If both the SubnetMask and PrefixLength parameter are ommitted, the Subnet Mask is 255.255.255.0 (/24).
+ .PARAMETER SecureWeb
+Specifies that the scan to use HTTPS when connecting to phone endpoints.
  .PARAMETER OutFile
-Path/File name of the output csv, if desired.
+Path/File name of the output csv, if desired. If ommitted, output is directed to the console.
  .PARAMETER MaxConnections
-Maximum number of concurrent phones to query (Default is 10).
+Maximum number of concurrent phones to query at a time (Default is 10).
 /#>
 
 
