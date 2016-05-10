@@ -168,7 +168,7 @@ Maximum number of concurrent phones to query at a time (Default is 10).
                 $html   = $html -split ', '
                 $html   = $html -replace ',,,,,', ''
                 
-                $DName  = $html | Select-String -Pattern "Domain Name,"
+                $DName  = $html | Select-String -Pattern "Domain Name"
                 $Dhcp   = $html | Select-String -Pattern "DHCP,"
                 
                 $DName  = $DName    -replace "Domain Name,",""
