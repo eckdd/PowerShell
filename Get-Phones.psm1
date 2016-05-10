@@ -168,8 +168,8 @@ Maximum number of concurrent phones to query at a time (Default is 10).
                 $html   = $html -split ', '
                 $html   = $html -replace ',,,,,', ''
                 
-                $DName  = $html | Select-String -Pattern "Domain Name",""
-                $Dhcp   = $html | Select-String -Pattern "DHCP,",""
+                $DName  = $html | Select-String -Pattern "Domain Name,"
+                $Dhcp   = $html | Select-String -Pattern "DHCP,"
                 
                 $DName  = $DName    -replace "Domain Name,",""
                 $Dhcp   = $Dhcp     -replace "DHCP,",""
@@ -193,8 +193,8 @@ Maximum number of concurrent phones to query at a time (Default is 10).
             Get-Job | Wait-Job | Out-Null
             $Phones = Get-Job -State Completed | Receive-Job
             $Phones = $Phones | select IPAddr,DHCP,MACAddr,DomainName,HostName,PhoneDN,Serial,Model,Version,TimeZone | sort
-            $Phones | Export-Csv -Path $OutFile -NoClobber -NoTypeInformation -Force
-            $Phones
+            if ($OutFile) { $Phones | Export-Csv -Path $OutFile -NoClobber -NoTypeInformation -Force } 
+             else { $Phones }
             Get-Job | Stop-Job |Out-Null
         }
 }
