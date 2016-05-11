@@ -1,4 +1,4 @@
-function List-IPAddresses {
+function Get-IPAddresses {
 <#
 
 /#>
