@@ -1,4 +1,4 @@
-function Gen-Config {
+function Write-Config {
 <#
 
 /#>
