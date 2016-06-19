@@ -1,4 +1,4 @@
-New-Routes {
+function New-Routes {
 
  param
     (
@@ -13,7 +13,7 @@ New-Routes {
     )
     
     process {
-    $add = @()
+    $addresses = @()
     $i = $RouteQty
     $Loopback = 1000
     while ($i -ge 0) {
@@ -61,7 +61,12 @@ New-Routes {
     $0ct3 = Get-Random -Minimum 0 -Maximum 255
     $0ct4 = Get-Random -Minimum 1 -Maximum 254
     [Net.IPAddress]$IPAddress="$Oct1.$0ct2.$0ct3.$0ct4"
-    $add += "$IPAddress $prefSubnetMask"
+
+    $address = New-Object -TypeName PSObject
+    $address | Add-Member -MemberType NoteProperty -Name Addr -Value $IPAddress
+    $address | Add-Member -MemberType NoteProperty -Name Mask -Value $prefSubnetMask
+    $addresses += $address
+    
     "interface loopback $Loopback" | Out-File RouteConfig.txt -Append
     " ip address $IPAddress $prefSubnetMask" | Out-File RouteConfig.txt -Append
     "!" | Out-File RouteConfig.txt -Append
@@ -71,9 +76,15 @@ New-Routes {
     $i--
     }
 
+
+
             if ($Protocol -eq "BGP") {
             "router bgp 999" | Out-File RouteConfig.txt -Append
-            $add | foreach { " network $_ " | Out-File RouteConfig.txt -Append }
+            $addresses | foreach { 
+                    $nw = $_.Addr
+                    $nm = $_.Mask
+                    " network $nw mask $nm " | Out-File RouteConfig.txt -Append
+                    }
             "end" | Out-File RouteConfig.txt -Append
             "!" | Out-File RouteConfig.txt -Append
             }
@@ -92,4 +103,4 @@ New-Routes {
             }
 
     }
-} here
+}
