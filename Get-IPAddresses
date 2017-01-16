@@ -56,10 +56,10 @@ function Get-IPAddresses {
         $SubnetMask = $SubnetMask
             } else { $SubnetMask = $prefSubnetMask }
 
-    [int]$ipOct1          = $NetworkID.GetAddressBytes()[0]
-    [int]$ipOct2          = $NetworkID.GetAddressBytes()[1]
-    [int]$ipOct3          = $NetworkID.GetAddressBytes()[2]
-    [int]$ipOct4          = $NetworkID.GetAddressBytes()[3]
+    [int]$ipOct1          = ((256 - $SubnetMask.GetAddressBytes()[0])) * ([math]::floor(($NetworkID.GetAddressBytes()[0] / (256 - $SubnetMask.GetAddressBytes()[0]))))
+    [int]$ipOct2          = ((256 - $SubnetMask.GetAddressBytes()[1])) * ([math]::floor(($NetworkID.GetAddressBytes()[1] / (256 - $SubnetMask.GetAddressBytes()[1]))))
+    [int]$ipOct3          = ((256 - $SubnetMask.GetAddressBytes()[2])) * ([math]::floor(($NetworkID.GetAddressBytes()[2] / (256 - $SubnetMask.GetAddressBytes()[2]))))
+    [int]$ipOct4          = ((256 - $SubnetMask.GetAddressBytes()[3])) * ([math]::floor(($NetworkID.GetAddressBytes()[3] / (256 - $SubnetMask.GetAddressBytes()[3]))))
     
     [int]$nmOct1          = $SubnetMask.GetAddressBytes()[0]
     [int]$nmOct2          = $SubnetMask.GetAddressBytes()[1]
@@ -79,8 +79,18 @@ function Get-IPAddresses {
                                                 }
                                                     }
                                                         }
-                                                                } 
-    $ipList  
+ 
+                                                               } 
+$count           = $ipList.Count
+
+$out             = New-Object -TypeName PSObject
+$out | Add-Member -MemberType NoteProperty -Name Network     -Value $ipList[0]
+$out | Add-Member -MemberType NoteProperty -Name FirstIP     -Value $ipList[1]
+$out | Add-Member -MemberType NoteProperty -Name LastIP      -Value $ipList[($count - 2)]
+$out | Add-Member -MemberType NoteProperty -Name Broadcast   -Value $ipList[($count - 1)]
+
+$out | fl
+
     
             }
 }  
