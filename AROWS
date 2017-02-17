@@ -1,0 +1,23 @@
+<#
+AROWS urls
+https://arows.sscno.nmci.navy.mil/arows/secure/login.jsp
+https://arows.sscno.nmci.navy.mil/arows/secure/dod_consent.do?actionButton=OK
+https://arows.sscno.nmci.navy.mil/arows/orders_print.do?track=5786861&mod=2
+
+/#>
+
+# Change thumbprint to appropriate cert:
+$cert = dir Cert:\CurrentUser\My\xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+$uas = ([Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer)
+
+Invoke-WebRequest -SessionVariable arows -Certificate $cert -UserAgent $uas -Uri 'https://arows.sscno.nmci.navy.mil/arows/secure/login.jsp'
+Invoke-WebRequest -WebSession $arows -Certificate $cert -UserAgent $uas -Uri 'https://arows.sscno.nmci.navy.mil/arows/secure/dod_consent.do?actionButton=OK'
+$tn = Get-Content ..\TN.txt
+$tn | foreach { Invoke-WebRequest -WebSession $arows -Certificate $cert -UserAgent $uas -Uri ("https://arows.sscno.nmci.navy.mil/arows/orders_print.do?track=$_") -OutFile ".\$_.pdf" }
+$tn | foreach { Invoke-WebRequest -WebSession $arows -Certificate $cert -UserAgent $uas -Uri ("https://arows.sscno.nmci.navy.mil/arows/orders_print.do?track=$_"+'&mod=1') -OutFile ".\$_.mod1.pdf" }
+$tn | foreach { Invoke-WebRequest -WebSession $arows -Certificate $cert -UserAgent $uas -Uri ("https://arows.sscno.nmci.navy.mil/arows/orders_print.do?track=$_"+'&mod=2') -OutFile ".\$_.mod2.pdf" }
+$tn | foreach { Invoke-WebRequest -WebSession $arows -Certificate $cert -UserAgent $uas -Uri ("https://arows.sscno.nmci.navy.mil/arows/orders_print.do?track=$_"+'&mod=3') -OutFile ".\$_.mod3.pdf" }
+$tn | foreach { Invoke-WebRequest -WebSession $arows -Certificate $cert -UserAgent $uas -Uri ("https://arows.sscno.nmci.navy.mil/arows/orders_print.do?track=$_"+'&mod=4') -OutFile ".\$_.mod4.pdf" }
+
+
