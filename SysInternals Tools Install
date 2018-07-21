@@ -1,0 +1,10 @@
+$url = "https://live.sysinternals.com"
+$output = "$env:windir\"
+
+ $files = (Invoke-WebRequest -Uri $url).Links | select href
+ #foreach ($file in $files) { Start-BitsTransfer -Source $url+$file.href -Description $output }
+foreach ($file in $files) { 
+    [string]$f = $file.href
+    [string]$i = $url+$f
+    Invoke-WebRequest -uri $i -OutFile $output\$f
+                          }
