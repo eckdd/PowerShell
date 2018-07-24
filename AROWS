@@ -7,8 +7,20 @@ https://arows.sscno.nmci.navy.mil/arows/orders_print.do?track=5786861&mod=2
 /#>
 
 # Change thumbprint to appropriate cert:
-$cert = dir Cert:\CurrentUser\My\xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#$cert = dir Cert:\CurrentUser\My\xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+
+[int]$i = 1
+$certs = dir Cert:\CurrentUser\My
+foreach ($c in $certs) {
+$c | Add-Member -MemberType NoteProperty -Name Choice -Value $i
+$i++
+}
+
+$certs | select Choice,FriendlyName,Thumbprint | Out-Host 
+
+[int]$choice = (Read-Host -Prompt "Enter Choice selection")
+$cert = $certs | where -Property Choice -EQ $choice
 $uas = ([Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer)
 
 Invoke-WebRequest -SessionVariable arows -Certificate $cert -UserAgent $uas -Uri 'https://arows.sscno.nmci.navy.mil/arows/secure/login.jsp'
