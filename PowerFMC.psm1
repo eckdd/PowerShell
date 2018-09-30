@@ -199,3 +199,60 @@ $response
 #############################################################################################################
 #############################################################################################################
 #############################################################################################################
+
+function Get-FMCNetworkGroup {
+<#
+ .SYNOPSIS
+Displays network groups in FMC
+ .DESCRIPTION
+This cmdlet will invoke a REST request against the FMC API and retrieve items under /object/networkgroups
+ .EXAMPLE
+# Get-FMCNetworkObjects -fmcHost "https://fmcrestapisandbox.cisco.com" -username 'davdecke' -password 'xxxxxx'
+
+ .PARAMETER fmcHost
+Base URL of FMC
+ .PARAMETER AuthAccessToken
+X-auth-accesss-token 
+ .PARAMETER Domain
+Domain UUID 
+/#>
+
+    param
+    (
+        [Parameter(Mandatory=$true,
+        ValueFromPipeline=$true,
+        ValueFromPipelineByPropertyName=$true)]
+            [string]$fmcHost,
+        [Parameter(Mandatory=$false,
+        ValueFromPipeline=$true,
+        ValueFromPipelineByPropertyName=$true)]
+            [string]$AuthAccessToken,
+            [string]$Domain
+    )
+add-type @"
+    using System.Net;
+    using System.Security.Cryptography.X509Certificates;
+    public class TrustAllCertsPolicy : ICertificatePolicy {
+        public bool CheckValidationResult(
+            ServicePoint srvPoint, X509Certificate certificate,
+            WebRequest request, int certificateProblem) {
+            return true;
+        }
+    }
+"@
+[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+[System.Net.ServicePointManager]::SecurityProtocol = 'Tls12'
+$uri = "$fmcHost/api/fmc_config/v1/domain/$Domain/object/networkgroups"
+$headers = @{ "X-auth-access-token" = "$AuthAccessToken" }
+$response = Invoke-RestMethod -Method Get -Uri $uri -Headers $headers
+$NetObjects = @()
+$response.items.links.self | foreach {
+    $NetObjects += Invoke-RestMethod -Method Get -Uri $_ -Headers $headers
+
+        }
+$NetObjects
+}
+
+#############################################################################################################
+#############################################################################################################
+#############################################################################################################
