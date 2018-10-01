@@ -60,6 +60,7 @@ $AuthAccessToken = $AuthResponse.Headers.Item('X-auth-access-token')
         }
 End {
 $output = New-Object -TypeName psobject
+$output | Add-Member -MemberType NoteProperty -Name fmcHost         -Value $fmcHost
 $output | Add-Member -MemberType NoteProperty -Name Domain          -Value $Domain
 $output | Add-Member -MemberType NoteProperty -Name AuthAccessToken -Value $AuthAccessToken
 $output
