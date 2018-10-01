@@ -345,7 +345,7 @@ $body | Add-Member -MemberType NoteProperty -name type        -Value "NetworkGro
 $body | Add-Member -MemberType NoteProperty -name literals    -Value $literals
 $body | Add-Member -MemberType NoteProperty -name overridable -Value $overridable
 $body | Add-Member -MemberType NoteProperty -name description -Value "$description"
-$body | Add-Member -MemberType NoteProperty -name name       -Value  "$name"
+$body | Add-Member -MemberType NoteProperty -name name        -Value  "$name"
  
 $response = Invoke-RestMethod -Method Post -Uri $uri -Headers $headers -Body ($body | ConvertTo-Json)
 $response
