@@ -1,0 +1,15 @@
+
+ Get-Content .\screenos.txt | select-string -Pattern '^set address' | foreach {
+ [string]$name = $_ -replace '^set address.+?".+?"\s+"(.+?)"\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+\.\d+\.\d+\.\d+).*','$1'
+ [string]$netw = $_ -replace '^set address.+?".+?"\s+(".+?")\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+\.\d+\.\d+\.\d+).*','$2'
+ [net.ipaddress]$mask = $_ -replace '^set address.+?".+?"\s+(".+?")\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+\.\d+\.\d+\.\d+).*','$3'
+ #[string]$desc = $_ -ireplace '(^set address.+?".+?"\s+".+?"\s+\d+\.\d+\.\d+\.\d+\s+\d+\.\d+\.\d+\.\d+\s+)(".+?")','$2'
+ [string]$pref = ([convert]::ToString($mask.Address,2) -replace '0','' | measure -Character).Characters
+
+ $i = New-Object -TypeName psobject
+ $i | Add-Member -MemberType NoteProperty -Name name -Value $name
+ $i | Add-Member -MemberType NoteProperty -Name Network -Value "$netw/$pref"
+ $i | Add-Member -MemberType NoteProperty -Name description -Value $desc
+ $AddressGroup = [Array]$AddressGroup + $i
+  }
+ $AddressGroup
