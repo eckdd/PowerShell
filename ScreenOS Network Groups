@@ -1,4 +1,4 @@
-$Groups | Export-Csv -NoClobber -NoTypeInformation -Path .\netgroups.csv
+
 
 
 $NetObjectGroups = @()
@@ -25,11 +25,11 @@ $unique | foreach {
     $uGroup | foreach {
              $Member = $_.MemberName
              $prefix = "$prefix$Member,"
-            # $prefix = $prefix -replace '(.*)\,$','$1'
                       }
+ $prefix = $prefix -replace ',$',''
  $Group = New-Object psobject
  $Group | Add-Member -MemberType NoteProperty -Name Name -Value $_.GroupName
  $Group | Add-Member -MemberType NoteProperty -Name Objects -Value $prefix
  $Groups += $Group
                   }
-$Groups | Export-Csv -NoClobber -NoTypeInformation -Path .\netgroups.csv
+
