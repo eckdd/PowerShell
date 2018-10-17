@@ -1,0 +1,34 @@
+
+
+
+$NetObjectGroups = @()
+$items = @()
+
+(Get-Content .\SCH-NS-FW-1_TECH.txt | Select-String '^set group address\s+\".+?\"\s+\".+?\"\s+add\s+') | ForEach-Object {
+$i = $_
+$GroupName  = $i -replace '^set\s+group\s+address\s+".+?"\s+"(.+?)".*','$1'
+$GroupName  = $GroupName -replace '(\/|\\)','_'
+$MemberName = $i -replace '^set\s+group\s+address\s+".+?"\s+".+?"\s+add\s+"(.+?)".*','$1'
+$MemberName = $MemberName -replace '(\/|\\)','_'
+
+$item = New-Object psobject
+$item | Add-Member -MemberType NoteProperty -Name GroupName  -Value $GroupName
+$item | Add-Member -MemberType NoteProperty -Name MemberName -Value $MemberName
+$items += $item
+}
+
+$Groups = @()
+$unique = $items | Select-Object GroupName -Unique
+$unique | foreach {
+    $uGroup = $items | Where-Object -Property GroupName -EQ -Value $_.GroupName
+    $prefix = @()
+    $uGroup | foreach {
+             $Member = $_.MemberName
+             $prefix = "$prefix$Member,"
+            # $prefix = $prefix -replace '(.*)\,$','$1'
+                      }
+ $Group = New-Object psobject
+ $Group | Add-Member -MemberType NoteProperty -Name Name -Value $_.GroupName
+ $Group | Add-Member -MemberType NoteProperty -Name Objects -Value $prefix
+ $Groups += $Group
+                  }
