@@ -1,4 +1,4 @@
-
+$Groups | Export-Csv -NoClobber -NoTypeInformation -Path .\netgroups.csv
 
 
 $NetObjectGroups = @()
@@ -32,3 +32,4 @@ $unique | foreach {
  $Group | Add-Member -MemberType NoteProperty -Name Objects -Value $prefix
  $Groups += $Group
                   }
+$Groups | Export-Csv -NoClobber -NoTypeInformation -Path .\netgroups.csv
