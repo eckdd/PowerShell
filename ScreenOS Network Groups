@@ -1,6 +1,3 @@
-
-
-
 $NetObjectGroups = @()
 $items = @()
 
@@ -33,3 +30,4 @@ $unique | foreach {
  $Groups += $Group
                   }
 
+$Groups | Export-Csv -NoClobber -NoTypeInformation -Path .\netgroups.csv
