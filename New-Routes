@@ -9,7 +9,8 @@ function New-Routes {
         [int]$RouteQty=100,
         [int]$minPref=24,
         [int]$maxPref=30,
-        [string]$Protocol="BGP"
+        [ValidateSet("BGP","EIGRP","OSPF","NONE")] 
+        [string]$Protocol="NONE"
     )
     
     process {
@@ -78,7 +79,7 @@ function New-Routes {
     }
 
 
-
+            if ($Protocol -eq "NONE") { $addresses | Out-File RouteConfig.txt -Append }
             if ($Protocol -eq "BGP") {
             "router bgp 999" | Out-File RouteConfig.txt -Append
             $addresses | foreach { 
