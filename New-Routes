@@ -7,7 +7,9 @@ function New-Routes {
         ValueFromPipelineByPropertyName=$false
         )]
         [int]$RouteQty=100,
+        [ValidateRange(1,32)]
         [int]$minPref=24,
+        [ValidateRange(1,32)]
         [int]$maxPref=30,
         [ValidateSet("BGP","EIGRP","OSPF","NONE")] 
         [string]$Protocol="NONE"
