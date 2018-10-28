@@ -17,8 +17,9 @@ function New-Routes {
     $i = $RouteQty
     $Loopback = 1000
     while ($i -ge 0) {
+        if ($minPref = $maxPref) { $PrefixLength = $maxPref } else {
         $PrefixLength = Get-Random -Minimum $minPref -Maximum $maxPref
-
+        }
            if ($Prefixlength -ge 32)
         {
             $m4 = 255
