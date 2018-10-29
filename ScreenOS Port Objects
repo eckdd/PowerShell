@@ -1,0 +1,31 @@
+Write-Host "Make the following manually:"
+ Get-Content .\TECH.txt | Select-String -Pattern '^set\s+service\s+".+?"\s+protocol\s+(?!(tcp|udp)).*'
+Write-Host " "
+Write-Host " "
+Write-Host "Discontiguous port ranges are not supported Create Port object groups for the following:"
+ Get-Content .\TECH.txt | Select-String -Pattern '^set\s+service\s+".+?"\s+\+.*'
+
+$PortObjects = @()
+(Get-Content .\TECH.txt | Select-String '^set\s+service\s+".+?"\s+protocol\s+(tcp|udp).*') | ForEach-Object {
+$name     = @()
+$protocol = @()
+$port     = @()
+
+$name     = $_ -replace '^set\s+service\s+"(.+)"\s+protocol\s+(tcp|udp)\s+src-port\s+(\d+\-\d+)\s+dst-port\s+(\d+\-\d+)','$1'
+$protocol = $_ -replace '^set\s+service\s+"(.+)"\s+protocol\s+(tcp|udp)\s+src-port\s+(\d+\-\d+)\s+dst-port\s+(\d+\-\d+)','$2'
+$port     = $_ -replace '^set\s+service\s+"(.+)"\s+protocol\s+(tcp|udp)\s+src-port\s+(\d+\-\d+)\s+dst-port\s+(\d+\-\d+)','$4'
+$name = $name -replace '\s+$',''
+$name = $name -replace '(\\|\/|\s)','_'
+
+[int]$bPort = ($port -split '-')[0]
+[int]$ePort = ($port -split '-')[1]
+if ($bPort -eq $ePort) { $port = $ePort }
+
+$PortObject = New-Object psobject
+$PortObject | Add-Member -MemberType NoteProperty -Name name     -Value $name
+$PortObject | Add-Member -MemberType NoteProperty -Name protocol -Value $protocol
+$PortObject | Add-Member -MemberType NoteProperty -Name port     -Value $port
+$PortObjects += $PortObject
+}
+
+$PortObjects
