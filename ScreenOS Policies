@@ -19,9 +19,9 @@ $policy | foreach {
  enabled    = $enabled   -replace '(\(|\)|:|enabled)',''
  from_zone  = $from_zone -replace '(\(|\)|:|from_zone)',''
  to_zone    = $to_zone   -replace '(\(|\)|:|to_zone)',''
- src_addr   = $src_addr  -replace '(\(|\)|:|src_addr)',''
- dst_addr   = $dst_addr  -replace '(\(|\)|:|dst_addr)',''
- service    = $service   -replace '(\(|\)|:|service)',''
+ src_addr   = ($src_addr  -replace '(\(|\)|:|src_addr|\s+)','') -replace '""','","'
+ dst_addr   = ($dst_addr  -replace '(\(|\)|:|dst_addr|\s+)','') -replace '""','","'
+ service    = ($service   -replace '(\(|\)|:|service|\s+)','') -replace '""','","'
  action     = $action    -replace '(\(|\)|:|action)',''
  }
  $rules += $rule
