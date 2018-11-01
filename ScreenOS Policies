@@ -10,7 +10,7 @@ $policy | foreach {
  $src_addr   = ([regex]::Match("$_",':src_addr\s\(\s+:\s(\(.+?\)\s+)+\)')).value
  $dst_addr   = ([regex]::Match("$_",':dst_addr\s\(\s+:\s(\(.+?\)\s+)+\)')).value
  $service    = ([regex]::Match("$_",':service\s\(\s+:\s(\(.+?\)\s+)+\)')).value
- $action     = ([regex]::Match("$_",':action\s\(\s+:\s(\(.+?\)\s+)+\)')).value
+ $action     = ([regex]::Match("$_",':action\s\(\s+:\w+')).value
 
 
 
@@ -22,7 +22,7 @@ $policy | foreach {
  src_addr   = ($src_addr  -replace '(\(|\)|:|src_addr|\s+)','') -replace '""','","'
  dst_addr   = ($dst_addr  -replace '(\(|\)|:|dst_addr|\s+)','') -replace '""','","'
  service    = ($service   -replace '(\(|\)|:|service|\s+)','') -replace '""','","'
- action     = $action    -replace '(\(|\)|:|action)',''
+ action     = $action    -replace '(\(|\)|:|action|\s+)',''
  }
  $rules += $rule
 }
