@@ -15,14 +15,15 @@ $policy | foreach {
 
 
  $rule = New-Object -TypeName psobject -Property @{
- pol_name   = $pol_name  -replace '(\(|\)|:|pol_name)','' 
- enabled    = $enabled   -replace '(\(|\)|:|enabled)',''
- from_zone  = $from_zone -replace '(\(|\)|:|from_zone)',''
- to_zone    = $to_zone   -replace '(\(|\)|:|to_zone)',''
- src_addr   = ($src_addr  -replace '(\(|\)|:|src_addr|\s+)','') -replace '""','","'
- dst_addr   = ($dst_addr  -replace '(\(|\)|:|dst_addr|\s+)','') -replace '""','","'
- service    = ($service   -replace '(\(|\)|:|service|\s+)','') -replace '""','","'
- action     = $action    -replace '(\(|\)|:|action|\s+)',''
+ Name                = $pol_name  -replace '(\(|\)|:|pol_name)','' 
+ enabled             = $enabled   -replace '(\(|\)|:|enabled)',''
+ SourceZones         = $from_zone -replace '(\(|\)|:|from_zone)',''
+ DestinationZones    = $to_zone   -replace '(\(|\)|:|to_zone)',''
+ SourceNetworks      = (($src_addr -replace '\(|\)|:src_addr\s\(\s+:\s','') -split '\s+:\s+') -join ','
+ DestinationNetworks = (($dst_addr -replace '\(|\)|:dst_addr\s\(\s+:\s','') -split '\s+:\s+') -join ','
+ DestinationPorts    = (($service  -replace ':service\s\(\s+:\s|\(|\)','') -split '\s+:\s+' ) -join ','
+ Action              = $action    -replace '(\(|\)|:|action|\s+)',''
  }
  $rules += $rule
 }
+ $rules | select Name,SourceZones,DestinationZones,SourceNetworks,DestinationNetworks,DestinationPorts,Action,enabled | export-csv rules1.csv -NoClobber -NoTypeInformation
