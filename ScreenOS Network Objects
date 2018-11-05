@@ -1,3 +1,4 @@
+############################## CONFIG ##############################
 
  Get-Content .\screenos.txt | select-string -Pattern '^set address' | foreach {
  [string]$name = $_ -replace '^set address.+?".+?"\s+"(.+?)"\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+\.\d+\.\d+\.\d+).*','$1'
@@ -13,3 +14,28 @@
  $AddressGroup = [Array]$AddressGroup + $i
   }
  $AddressGroup
+ 
+ 
+ ############################## DATAFILE ##############################
+ 
+$address = Get-Content .\datafile.txt
+$address = $address -join ''
+$address = $address -split '\s+:\s+'
+$addresses  = @()
+$address | foreach {
+ $NetName   = ([regex]::Match("$_",'^\(".+?"\s')).value -replace'^\(',''
+ $Network   = ([regex]::Match("$_",':ip\s\(".+?"\)')).value -replace ':ip|\s|\(|\)|"',''
+ $NetMask   = ([regex]::Match("$_",':netmask\s\(\d{1,2}\)')).value -replace ':netmask\s\(|\)',''
+ $Comment   = ([regex]::Match("$_",':comment\s\(".+?"\)')).value  -replace ':comment\s\(|\)',''
+ $DomainN   = ([regex]::Match("$_",':domain-name\s\(".+?"\)')).value  -replace ':domain-name\s\(|\)',''
+
+ $NetAddress = New-Object -TypeName psobject -Property @{
+ Name                = $NetName
+ Network             = "$Network/$NetMask"
+ Description         = $Comment
+ DomainName          = $DomainN
+ }
+ $addresses += $NetAddress
+}
+ $addresses | select Name,Network,Description,DomainName | export-csv addresses1.csv -NoClobber -NoTypeInformation
+
