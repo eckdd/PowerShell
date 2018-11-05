@@ -29,13 +29,11 @@ $address | foreach {
  $Comment   = ([regex]::Match("$_",':comment\s\(".+?"\)')).value  -replace ':comment\s\(|\)',''
  $DomainN   = ([regex]::Match("$_",':domain-name\s\(".+?"\)')).value  -replace ':domain-name\s\(|\)',''
 
- $NetAddress = New-Object -TypeName psobject -Property @{
- Name                = $NetName
- Network             = "$Network/$NetMask"
- Description         = $Comment
- DomainName          = $DomainN
- }
+ $NetAddress = New-Object -TypeName psobject
+ $NetAddress | Add-Member -MemberType NoteProperty -Name Name        -Value $NetName
+ $NetAddress | Add-Member -MemberType NoteProperty -Name Network     -Value "$Network/$NetMask"
+ $NetAddress | Add-Member -MemberType NoteProperty -Name Description -Value $Comment
+ $NetAddress | Add-Member -MemberType NoteProperty -Name DomainName  -Value $DomainN
  $addresses += $NetAddress
 }
- $addresses | select Name,Network,Description,DomainName | export-csv addresses1.csv -NoClobber -NoTypeInformation
-
+ $addresses | export-csv addresses1.csv -NoClobber -NoTypeInformation
